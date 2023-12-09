@@ -28,7 +28,7 @@
 #include "filter.h"
 #include "groupby.h"
 
-#define DATA_BUFFER 1024*50
+#define DATA_BUFFER 1024*1024*2
 
 int close_socket(int fd) {
     close(fd);
@@ -238,15 +238,26 @@ int recv_from_socket_ssl(SSL *conn, std::vector<std::string> &msgs, std::string 
 
     while (1) 
     {
+        auto start = std::chrono::high_resolution_clock::now();
         char *buf = new char[DATA_BUFFER];
         int ret_data = SSL_read(conn, buf, DATA_BUFFER);
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "Time taken to read data = " << duration.count() << " ms" << std::endl;
 
         if (ret_data > 0) 
         {
             std::string msg(buf, buf + ret_data);
             msg = remainder + msg;
 
+            std::cout << ret_data << std::endl;
+
+            start = std::chrono::high_resolution_clock::now();
             std::vector<std::string> parts = split_inline(msg, sep, colnames, col_dtype_map, data, index, tree, grp, grpby_cache);
+            end = std::chrono::high_resolution_clock::now();
+            duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+            std::cout << "Time taken to parse data = " << duration.count() << " ms" << std::endl;
+
             msgs.insert(msgs.end(), parts.begin(), parts.end());
             remainder = msg;
         } 
@@ -259,6 +270,8 @@ int recv_from_socket_ssl(SSL *conn, std::vector<std::string> &msgs, std::string 
             fprintf(stderr, "recv: %s (%d)\n", strerror(errno), errno);
             return -1;
         }
+        
+
     }
 
     return 1;
