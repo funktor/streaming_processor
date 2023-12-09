@@ -43,8 +43,8 @@ void update_value_int(const std::string grpby_col_key, const std::string summari
             if (metric == "sum") val += v;
             else if (metric == "min") val = std::min(val, v);
             else if (metric == "max") val = std::max(val, v);
-            else if (metric == "count") val += 1L;
-            else if (metric == "avg") val = (val*(cnts-1) + v)/cnts;
+            else if (metric == "count") val += v;
+            else if (metric == "avg") val = (v*(cnts-1) + val)/cnts;
         }
 
         else if (key_values.find(grpby_col_key) != key_values.end() 
@@ -82,8 +82,8 @@ void update_value_dbl(const std::string grpby_col_key, const std::string summari
             if (metric == "sum") val += v;
             else if (metric == "min") val = std::min(val, v);
             else if (metric == "max") val = std::max(val, v);
-            else if (metric == "count") val += 1L;
-            else if (metric == "avg") val = (val*((double)cnts-1.0) + v)/(double)cnts;
+            else if (metric == "count") val += v;
+            else if (metric == "avg") val = (v*((double)cnts-1.0) + val)/(double)cnts;
         }
 
         else if (key_values.find(grpby_col_key) != key_values.end() 
@@ -136,6 +136,7 @@ void update_key_values(GroupByInp grp_inp, GroupByCache &grpby_cache, str_str_um
             col_val = "1";
             dtype = "int";
         }
+
         else
         {
             col_val = col_vals[summarize_col];
