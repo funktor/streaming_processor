@@ -36,10 +36,8 @@ std::string replace_space_before_parenthesis(std::string query)
     return query;
 }
 
-bool filter(FilterTree *tree, 
-            std::unordered_map<std::string, std::string> row, 
-            std::unordered_map<std::string, std::string> dtypes) {
-
+bool filter(const FilterTree *tree, const str_str_umap row, const str_str_umap dtypes) 
+{
     if (tree == nullptr) {
         return false;
     }
@@ -49,29 +47,29 @@ bool filter(FilterTree *tree,
         std::string col = tree->column;
         std::string val = tree->value;
 
-        if (cmp == "==") return row[col] == val;
-        else if (cmp == "!=") return row[col] != val;
+        if (cmp == "==") return row.at(col) == val;
+        else if (cmp == "!=") return row.at(col) != val;
         else if (cmp == ">=") {
-            if (dtypes[col] == "int" || dtypes[col] == "float") {
-                return std::stof(row[col]) >= std::stof(val);
+            if (dtypes.at(col) == "int" || dtypes.at(col) == "float") {
+                return std::stof(row.at(col)) >= std::stof(val);
             }
             return false;
         }
         else if (cmp == "<=") {
-            if (dtypes[col] == "int" || dtypes[col] == "float") {
-                return std::stof(row[col]) <= std::stof(val);
+            if (dtypes.at(col) == "int" || dtypes.at(col) == "float") {
+                return std::stof(row.at(col)) <= std::stof(val);
             }
             return false;
         }
         else if (cmp == ">") {
-            if (dtypes[col] == "int" || dtypes[col] == "float") {
-                return std::stof(row[col]) > std::stof(val);
+            if (dtypes.at(col) == "int" || dtypes.at(col) == "float") {
+                return std::stof(row.at(col)) > std::stof(val);
             }
             return false;
         }
         else if (cmp == "<") {
-            if (dtypes[col] == "int" || dtypes[col] == "float") {
-                return std::stof(row[col]) < std::stof(val);
+            if (dtypes.at(col) == "int" || dtypes.at(col) == "float") {
+                return std::stof(row.at(col)) < std::stof(val);
             }
             return false;
         }

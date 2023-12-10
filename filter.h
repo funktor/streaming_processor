@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include <boost/algorithm/string/replace.hpp>
+#include "datastructure.h"
 
 struct FilterTree {
     std::string op;
@@ -15,5 +16,5 @@ struct FilterTree {
 
 std::string replace_multiple_spaces(std::string query);
 std::string replace_space_before_parenthesis(std::string query);
-bool filter(FilterTree *tree, std::unordered_map<std::string, std::string> row, std::unordered_map<std::string, std::string> dtypes);
+bool filter(const FilterTree *tree, const str_str_umap row, const str_str_umap dtypes);
 FilterTree* build_filter_tree(std::string query);

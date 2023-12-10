@@ -103,17 +103,17 @@ void update_value_dbl(const std::string grpby_col_key, const std::string summari
     }    
 }
 
-void update_key_values(GroupByInp grp_inp, GroupByCache &grpby_cache, str_str_umap col_vals, str_str_umap col_dtype_map) 
+void update_key_values(const GroupByInp grp_inp, GroupByCache &grpby_cache, const str_str_umap col_vals, const str_str_umap col_dtype_map) 
 {
     std::string col_key = "";
     std::vector<std::string> colnames = grp_inp.group_by_columns;
 
     for (int i = 0; i < colnames.size()-1; i++) 
     {
-        col_key += col_vals[colnames[i]] + "|";
+        col_key += col_vals.at(colnames[i]) + "|";
     }
 
-    col_key += col_vals[*colnames.rbegin()];
+    col_key += col_vals.at(*colnames.rbegin());
 
     if (grpby_cache.grpby_cnts.find(col_key) == grpby_cache.grpby_cnts.end()) 
     {
@@ -139,8 +139,8 @@ void update_key_values(GroupByInp grp_inp, GroupByCache &grpby_cache, str_str_um
 
         else
         {
-            col_val = col_vals[summarize_col];
-            dtype = col_dtype_map[summarize_col];
+            col_val = col_vals.at(summarize_col);
+            dtype = col_dtype_map.at(summarize_col);
         }
 
         if (dtype == "int") update_value_int(col_key, summarize_col_new, col_val, metric, grpby_cache);

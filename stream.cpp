@@ -39,7 +39,7 @@ long get_time_ms() {
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
-int parse_row(std::string row, std::vector<std::string> colnames, str_str_umap col_dtype_map, csv_rows &data, int *&index, FilterTree *tree, GroupByInp grp, GroupByCache &grpby_cache) 
+int parse_row(const std::string row, const std::vector<std::string> colnames, const str_str_umap col_dtype_map, csv_rows &data, int *&index, const FilterTree *tree, const GroupByInp grp, GroupByCache &grpby_cache) 
 {
     
     if (index[0] < 19) 
@@ -107,8 +107,7 @@ int parse_row(std::string row, std::vector<std::string> colnames, str_str_umap c
     return 1;
 }
 
-// Split a string by delimiter. Modifies original string
-std::vector<std::string> split_inline(std::string &s, std::string delimiter, std::vector<std::string> colnames, str_str_umap col_dtype_map, csv_rows &data, int *&index, FilterTree *tree, GroupByInp grp, GroupByCache &grpby_cache) 
+std::vector<std::string> split_inline(std::string &s, const std::string delimiter) 
 {
     size_t pos = 0;
     std::vector<std::string> parts;
@@ -116,20 +115,14 @@ std::vector<std::string> split_inline(std::string &s, std::string delimiter, std
     while ((pos = s.find(delimiter)) != std::string::npos) 
     {
         std::string token = s.substr(0, pos);
-        if (token.size() > 0) 
-        {
-            parts.push_back(token);
-            parse_row(token, colnames, col_dtype_map, data, index, tree, grp, grpby_cache);
-        }
-
+        if (token.size() > 0) parts.push_back(token);
         s.erase(0, pos + delimiter.length());
     }
     
     return parts;
 }
 
-// Split a string by delimiter. Does not modify original string
-std::vector<std::string> split(std::string s, std::string delimiter) 
+std::vector<std::string> split(std::string s, const std::string delimiter) 
 {
     size_t pos = 0;
     std::vector<std::string> parts;
@@ -146,8 +139,7 @@ std::vector<std::string> split(std::string s, std::string delimiter)
     return parts;
 }
 
-// Connect to ip and port using sockets
-int connect(std::string host, int port, bool blocking=false) 
+int connect(const std::string host, const int port, bool blocking=false) 
 {
     struct sockaddr_in saddr;
     int fd, ret_val, ret;
@@ -202,7 +194,7 @@ struct SSLdata
     int err;
 };
 
-SSLdata get_ssl_conn(int fd) 
+SSLdata get_ssl_conn(const int fd) 
 {
     SSL_load_error_strings ();
     SSL_library_init ();
@@ -223,43 +215,34 @@ SSLdata get_ssl_conn(int fd)
     return mydata;
 } 
 
-// Send message to SSL socket
-int send_to_socket_ssl(SSL *conn, std::string msg) 
+int send_to_socket_ssl(SSL *conn, const std::string msg) 
 {
     const char *msg_chr = msg.c_str();
     int res = SSL_write(conn, msg_chr, strlen(msg_chr));
     return res;
 }
 
-// Receive data from socket and store them in msgs
-int recv_from_socket_ssl(SSL *conn, std::vector<std::string> &msgs, std::string sep, std::vector<std::string> colnames, str_str_umap col_dtype_map, csv_rows &data, int *&index, FilterTree *tree, GroupByInp grp, GroupByCache &grpby_cache) 
+int recv_from_socket_ssl(SSL *conn, std::vector<std::string> &msgs, const std::string sep, const std::vector<std::string> colnames, const str_str_umap col_dtype_map, csv_rows &data, int *&index, const FilterTree *tree, const GroupByInp grp, GroupByCache &grpby_cache) 
 {
     std::string remainder = "";
 
     while (1) 
     {
-        auto start = std::chrono::high_resolution_clock::now();
-
         char *buf = new char[DATA_BUFFER];
         int ret_data = SSL_read(conn, buf, DATA_BUFFER);
-
-        auto end = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-        std::cout << "Time taken to read data = " << duration.count() << " ms" << std::endl;
 
         if (ret_data > 0) 
         {
             std::string msg(buf, buf + ret_data);
             msg = remainder + msg;
 
-            start = std::chrono::high_resolution_clock::now();
+            std::vector<std::string> parts = split_inline(msg, sep);
 
-            std::vector<std::string> parts = split_inline(msg, sep, colnames, col_dtype_map, data, index, tree, grp, grpby_cache);
+            for (std::string row : parts)
+            {
+                parse_row(row, colnames, col_dtype_map, data, index, tree, grp, grpby_cache);
+            }
             
-            end = std::chrono::high_resolution_clock::now();
-            duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-            std::cout << "Time taken to parse data = " << duration.count() << " ms" << std::endl;
-
             msgs.insert(msgs.end(), parts.begin(), parts.end());
             remainder = msg;
         } 
@@ -279,7 +262,7 @@ int recv_from_socket_ssl(SSL *conn, std::vector<std::string> &msgs, std::string 
     return 1;
 }
 
-int colnames_dtypes(std::string col_dtypes, std::vector<std::string> &colnames, str_str_umap &col_dtype_map) 
+int colnames_dtypes(const std::string col_dtypes, std::vector<std::string> &colnames, str_str_umap &col_dtype_map) 
 {
     std::vector<std::string> cols = split(col_dtypes, ",");
 
@@ -304,7 +287,7 @@ int colnames_dtypes(std::string col_dtypes, std::vector<std::string> &colnames, 
     return 1;
 }
 
-int query_process(std::string query, FilterTree *&mytree, GroupByInp &grpby) 
+int query_process(const std::string query, FilterTree *&mytree, GroupByInp &grpby) 
 {
     std::vector<std::string> stages = split(query, "|");
 
