@@ -1,5 +1,41 @@
 #include "filter.h"
 
+std::string replace_multiple_spaces(std::string query)
+{
+    int space_pointer = -1;
+    
+    for (int i = query.size()-1; i >= 0; i--)
+    { 
+        if (space_pointer == -1 && query[i] == ' ' && (i+1 >= query.size() || query[i+1] == ' '))
+        {
+            space_pointer = i;
+        }
+            
+        if ((query[i] != ' ' && space_pointer != -1) || (query[i] == ' ' && space_pointer != -1 && space_pointer+1 < query.size() && query[space_pointer+1] != ' '))
+        {
+            query[space_pointer] = query[i];
+            space_pointer -= 1;
+        }
+    }
+
+    if (query[space_pointer+1] != ' ')
+    {
+        return query.substr(space_pointer+1);
+    }
+    else 
+    {
+        return query.substr(space_pointer+2);
+    }
+}
+
+std::string replace_space_before_parenthesis(std::string query)
+{
+    boost::replace_all(query, "( ", "(");
+    boost::replace_all(query, " )", ")");
+    
+    return query;
+}
+
 bool filter(FilterTree *tree, 
             std::unordered_map<std::string, std::string> row, 
             std::unordered_map<std::string, std::string> dtypes) {

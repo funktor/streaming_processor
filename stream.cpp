@@ -28,7 +28,7 @@
 #include "filter.h"
 #include "groupby.h"
 
-#define DATA_BUFFER 1024*1024*2
+#define DATA_BUFFER 16384
 
 int close_socket(int fd) {
     close(fd);
@@ -239,8 +239,10 @@ int recv_from_socket_ssl(SSL *conn, std::vector<std::string> &msgs, std::string 
     while (1) 
     {
         auto start = std::chrono::high_resolution_clock::now();
+
         char *buf = new char[DATA_BUFFER];
         int ret_data = SSL_read(conn, buf, DATA_BUFFER);
+
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
         std::cout << "Time taken to read data = " << duration.count() << " ms" << std::endl;
@@ -250,10 +252,10 @@ int recv_from_socket_ssl(SSL *conn, std::vector<std::string> &msgs, std::string 
             std::string msg(buf, buf + ret_data);
             msg = remainder + msg;
 
-            std::cout << ret_data << std::endl;
-
             start = std::chrono::high_resolution_clock::now();
+
             std::vector<std::string> parts = split_inline(msg, sep, colnames, col_dtype_map, data, index, tree, grp, grpby_cache);
+            
             end = std::chrono::high_resolution_clock::now();
             duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
             std::cout << "Time taken to parse data = " << duration.count() << " ms" << std::endl;
@@ -314,7 +316,10 @@ int query_process(std::string query, FilterTree *&mytree, GroupByInp &grpby)
         {
             if (stage_parts[0] == "filter") 
             {
-                mytree = build_filter_tree(stage_parts[1]);
+                std::string filter_query = stage_parts[1];
+                filter_query = replace_multiple_spaces(filter_query);
+                filter_query = replace_space_before_parenthesis(filter_query);
+                mytree = build_filter_tree(filter_query);
             }
 
             else if (stage_parts[0] == "groupby") 
