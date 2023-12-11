@@ -14,12 +14,18 @@ g++ -O3 *.cpp -o stream -lssl -lcrypto
 
 2. For accessing Azure blob storage, we need to pass the storage account name, the path of the file inside and the access key (obtained from the azure portal). Here we need to first set these environment variables through command line:
 ```
-storage_account="spotpricingdevst"
+storage_account="<storage_account_name>"
 path="/container_name/path_to_file.csv"
-access_key=<storage_account_access_key>
+access_key="<storage_account_access_key>"
 ```
 
 3. Run the compiled program with similar arguments:
 ```
-./stream "$storage_account" "$path" "$access_key" "$storage_account.blob.core.windows.net" "col_A:string,col_B:int,col_C:float" "filter:col_B == x and col_C >= y|groupby:metric=sum,avg,count&on=col_A&summarize=col_B,col_C,_count&summarize_new=sum_col_B,avg_col_C,counts"
+./stream \
+    "$storage_account" \
+    "$path" \
+    "$access_key" \
+    "$storage_account.blob.core.windows.net" \
+    "col_A:string,col_B:int,col_C:float" \
+    "filter:col_B == x and col_C >= y|groupby:metric=sum,avg,count&on=col_A&summarize=col_B,col_C,_count&summarize_new=sum_col_B,avg_col_C,counts"
 ```
