@@ -32,12 +32,13 @@ void update_value_int(const std::string grpby_col_key, const std::string summari
         long val = std::stol(summarize_col_val);
         long cnts = grpby_cache.grpby_cnts[grpby_col_key];
         
-        grpby_umap key_values = grpby_cache.grpby_key_values;
+        grpby_umap &key_values = grpby_cache.grpby_key_values;
 
-        if (key_values.find(grpby_col_key) != key_values.end() 
-                && key_values[grpby_col_key].find(summarize_col) != key_values[grpby_col_key].end()) 
+        bool a = key_values.find(grpby_col_key) != key_values.end();
+        bool b = a && key_values[grpby_col_key].find(summarize_col) != key_values[grpby_col_key].end();
+
+        if (b) 
         {
-
             long v = key_values[grpby_col_key][summarize_col].int_val;
 
             if (metric == "sum") val += v;
@@ -47,20 +48,19 @@ void update_value_int(const std::string grpby_col_key, const std::string summari
             else if (metric == "avg") val = (v*(cnts-1) + val)/cnts;
         }
 
-        else if (key_values.find(grpby_col_key) != key_values.end() 
-                    && key_values[grpby_col_key].find(summarize_col) == key_values[grpby_col_key].end())
+        else if (a)
         {
-            ColumnTypes col_type = {"", 0, 0.0, false, nullptr};
-            grpby_cache.grpby_key_values[grpby_col_key][summarize_col] = col_type;
+            ColumnTypes col_type;
+            key_values[grpby_col_key][summarize_col] = col_type;
         }
 
         else
         {
             std::unordered_map<std::string, ColumnTypes> summarize_col_values;
-            grpby_cache.grpby_key_values[grpby_col_key] = summarize_col_values;
+            key_values[grpby_col_key] = summarize_col_values;
         }
 
-        grpby_cache.grpby_key_values[grpby_col_key][summarize_col].int_val = val;
+        key_values[grpby_col_key][summarize_col].int_val = val;
     }
 }
 
@@ -71,12 +71,13 @@ void update_value_dbl(const std::string grpby_col_key, const std::string summari
         double val = std::stod(summarize_col_val);
         long cnts = grpby_cache.grpby_cnts[grpby_col_key];
 
-        grpby_umap key_values = grpby_cache.grpby_key_values;
+        grpby_umap &key_values = grpby_cache.grpby_key_values;
 
-        if (key_values.find(grpby_col_key) != key_values.end() 
-                && key_values[grpby_col_key].find(summarize_col) != key_values[grpby_col_key].end()) 
+        bool a = key_values.find(grpby_col_key) != key_values.end();
+        bool b = a && key_values[grpby_col_key].find(summarize_col) != key_values[grpby_col_key].end();
+
+        if (b) 
         {
-
             double v = key_values[grpby_col_key][summarize_col].double_val;
 
             if (metric == "sum") val += v;
@@ -86,20 +87,19 @@ void update_value_dbl(const std::string grpby_col_key, const std::string summari
             else if (metric == "avg") val = (v*((double)cnts-1.0) + val)/(double)cnts;
         }
 
-        else if (key_values.find(grpby_col_key) != key_values.end() 
-                    && key_values[grpby_col_key].find(summarize_col) == key_values[grpby_col_key].end())
+        else if (a)
         {
-            ColumnTypes col_type = {"", 0, 0.0, false, nullptr};
-            grpby_cache.grpby_key_values[grpby_col_key][summarize_col] = col_type;
+            ColumnTypes col_type;
+            key_values[grpby_col_key][summarize_col] = col_type;
         }
 
         else
         {
             std::unordered_map<std::string, ColumnTypes> summarize_col_values;
-            grpby_cache.grpby_key_values[grpby_col_key] = summarize_col_values;
+            key_values[grpby_col_key] = summarize_col_values;
         }
 
-        grpby_cache.grpby_key_values[grpby_col_key][summarize_col].double_val = val;
+        key_values[grpby_col_key][summarize_col].double_val = val;
     }    
 }
 
@@ -114,13 +114,7 @@ void update_key_values(const GroupByInp grp_inp, GroupByCache &grpby_cache, cons
     }
 
     col_key += col_vals.at(*colnames.rbegin());
-
-    if (grpby_cache.grpby_cnts.find(col_key) == grpby_cache.grpby_cnts.end()) 
-    {
-        grpby_cache.grpby_cnts[col_key] = 0;
-    }
-
-    grpby_cache.grpby_cnts[col_key] += 1;
+    grpby_cache.grpby_cnts[col_key]++;
 
     for (int i = 0; i < grp_inp.metric_names.size(); i++) 
     {

@@ -51,25 +51,25 @@ bool filter(const FilterTree *tree, const str_str_umap row, const str_str_umap d
         else if (cmp == "!=") return row.at(col) != val;
         else if (cmp == ">=") {
             if (dtypes.at(col) == "int" || dtypes.at(col) == "float") {
-                return std::stof(row.at(col)) >= std::stof(val);
+                return std::stod(row.at(col)) >= std::stod(val);
             }
             return false;
         }
         else if (cmp == "<=") {
             if (dtypes.at(col) == "int" || dtypes.at(col) == "float") {
-                return std::stof(row.at(col)) <= std::stof(val);
+                return std::stod(row.at(col)) <= std::stod(val);
             }
             return false;
         }
         else if (cmp == ">") {
             if (dtypes.at(col) == "int" || dtypes.at(col) == "float") {
-                return std::stof(row.at(col)) > std::stof(val);
+                return std::stod(row.at(col)) > std::stod(val);
             }
             return false;
         }
         else if (cmp == "<") {
             if (dtypes.at(col) == "int" || dtypes.at(col) == "float") {
-                return std::stof(row.at(col)) < std::stof(val);
+                return std::stod(row.at(col)) < std::stod(val);
             }
             return false;
         }
