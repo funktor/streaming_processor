@@ -441,12 +441,12 @@ int main(int argc, char *argv[]) {
     {
         data.clear();
 
-        for (auto kv : grpby_cache.grpby_key_values) 
+        for (auto &kv : grpby_cache.grpby_key_values) 
         {
             str_str_umap col_vals;
 
             std::string grp_col_key = kv.first;
-            std::unordered_map<std::string, ColumnTypes> summarize_values = kv.second;
+            std::unordered_map<std::string, ColumnTypes> &summarize_values = kv.second;
 
             std::vector<std::string> cols = split(grp_col_key, "|");
 
@@ -483,7 +483,7 @@ int main(int argc, char *argv[]) {
 
     for (int i = 0; i < data.size(); i++) 
     {
-        for (auto kv : data[i]) 
+        for (auto &kv : data[i]) 
         {
             std::cout << kv.first << " : " << kv.second << ", ";
         }
