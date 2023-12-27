@@ -28,10 +28,19 @@ std::string replace_multiple_spaces(std::string query)
     }
 }
 
+void replace_all_substrings(std::string& source_string, const std::string source_pattern, const std::string target_pattern) {
+    if (source_pattern.size() == 0) return;
+    size_t pos = 0;
+    while ((pos = source_string.find(source_pattern, pos)) != std::string::npos) {
+        source_string.replace(pos, source_pattern.length(), target_pattern);
+        pos += target_pattern.length();
+    }
+}
+
 std::string replace_space_before_parenthesis(std::string query)
 {
-    boost::replace_all(query, "( ", "(");
-    boost::replace_all(query, " )", ")");
+    replace_all_substrings(query, "( ", "(");
+    replace_all_substrings(query, " )", ")");
     
     return query;
 }
